@@ -1,0 +1,50 @@
+.slider {
+    display: flex;
+    width: 80ch;
+    aspect-ratio: 800/300;
+    //outline: 2px solid white;
+    -webkit-user-drag: none;
+    overflow: hidden;
+
+    .item {
+        position: relative;
+        overflow: hidden;
+        -webkit-user-drag: none;
+        user-select: none;
+        opacity: calc(var(--ratio) * 4);
+        filter: grayscale(calc(1 - var(--ratio)));
+        border-radius: 1rem;
+        
+        img {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 1rem;
+        }
+
+        &:not(:last-child){
+         img {
+            margin-left: -1rem;
+         }
+        }
+        span {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            font-weight: 600;
+            font-size: 2rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 1.5rem rgba(0,0,0,1);
+            transform: translate(0, 1rem);
+        }
+        &.active {
+            span {
+                opacity: 1;
+                transform: translate(0, 0);
+            }
+        }
+    }
+}
