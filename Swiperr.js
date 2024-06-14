@@ -15,8 +15,6 @@ export default class Swiperr {
 
         this.computeSizes()
 
-        this.sizes = [0.7, 0.2, 0.15]
-
         this.updateRect()
         this.bind()
 
