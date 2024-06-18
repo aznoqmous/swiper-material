@@ -1,4 +1,4 @@
-export default class Swiperr {
+export default class SwiperMaterial {
     constructor(container){
         this.container = container
 
@@ -11,9 +11,11 @@ export default class Swiperr {
         this.idleReduction = 2/3
         this.dragModifier = 1.5
         
+        
         this.items = Array.from(this.container.children)
-
-        this.computeSizes()
+        
+        this.sizes = [0.7, 0.1]
+        //this.computeSizes()
 
         this.updateRect()
         this.bind()
@@ -77,6 +79,7 @@ export default class Swiperr {
             sizeLeft -= currentSize
         }
         this.sizes.push(sizeLeft)
+        console.log(this.sizes)
     }
 
     loop(){

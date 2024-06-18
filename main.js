@@ -1,6 +1,6 @@
-import Swiperr from './Swiperr'
+import SwiperMaterial from './swiper-material'
 import './style.scss'
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  new Swiperr(document.querySelector('.slider'))
+  new SwiperMaterial(document.querySelector('.slider'))
 })
