@@ -2,9 +2,11 @@ export default class SwiperMaterial {
     constructor(container){
         this.container = container
 
-        this.currentIndex = 2
+        this._currentIndex = 2
+        this._targetIndex = this._currentIndex
         this.startDrag = null
         this.currentDrag = 0
+        this.moveDrag = 0
         
         this.activeSize = 0.7
         this.idleCount = 2
@@ -14,7 +16,8 @@ export default class SwiperMaterial {
         
         this.items = Array.from(this.container.children)
         
-        this.sizes = [0.7, 0.1]
+        this.sizes = [0.7, 0.2, 0.1]
+
         //this.computeSizes()
 
         this.updateRect()
@@ -27,31 +30,30 @@ export default class SwiperMaterial {
         this.container.addEventListener('mousedown', (e)=>{
             this.updateRect()
             this.startDrag = e.clientX
+            this.moveDrag = 0
             const initialOffset = this.currentDrag / this.dragModifier * this.rect.width
             this.startDrag -= initialOffset
         })
         window.addEventListener('mousemove', (e)=>{
             if(!this.startDrag) return;
+            this.moveDrag = e.clientX - this.startDrag
             this.currentDrag = (e.clientX - this.startDrag)/this.rect.width * this.dragModifier
             this.update()
         })
 
         window.addEventListener('mouseup', (e)=>{
             if(!this.startDrag) return;
-            this.startDrag = null    
+            this.startDrag = null
             
+            if(!this.moveDrag) return;
             this.applyCurrentDrag()
 
             this.loop()
         })
 
-        /*
         this.bindItems('click', (e,item,i)=>{
             this.setIndex(i)
         })
-        */
-
-        this.container.addEventListener('dragstart', (e)=> e.preventDefault())
     }
 
     bindItems(eventName, callback){
@@ -60,10 +62,10 @@ export default class SwiperMaterial {
 
     applyCurrentDrag(){
         if(Math.abs(this.currentDrag) > 0.3){
-            const nextIndex = minmax(this.currentIndex - Math.sign(this.currentDrag), 0, this.items.length-1)
+            const nextIndex = minmax(this._currentIndex - Math.sign(this.currentDrag), 0, this.items.length-1)
             
-            this.currentDrag -= this.currentIndex - nextIndex
-            this.currentIndex = nextIndex
+            this.currentDrag -= this._currentIndex - nextIndex
+            this._currentIndex = nextIndex
 
             if(nextIndex == 0 || nextIndex == this.items.length - 1) return;
             if(Math.abs(this.currentDrag) > 0.5) this.applyCurrentDrag()
@@ -79,7 +81,6 @@ export default class SwiperMaterial {
             sizeLeft -= currentSize
         }
         this.sizes.push(sizeLeft)
-        console.log(this.sizes)
     }
 
     loop(){
@@ -91,7 +92,7 @@ export default class SwiperMaterial {
     }
 
     update(){
-        const index = minmax(this.currentIndex - this.currentDrag, 0, this.items.length-1)
+        const index = minmax(this._currentIndex - this.currentDrag, 0, this.items.length-1)
         this.items.map((item, i)=>{
             const dist = Math.abs(index - i)
             const prevDist = Math.floor(dist)
@@ -111,6 +112,20 @@ export default class SwiperMaterial {
         this.container.style.setProperty('--container-width', this.rect.width + "px")
         this.container.style.setProperty('--container-height', this.rect.height + "px")
         this.container.style.setProperty('--active-size', this.activeSize)
+    }
+
+    setIndex(index){
+        index = minmax(index, 0, this.items.length-1)
+        this.currentDrag = index - this._currentIndex
+        this._currentIndex = index
+        this.loop()
+    }
+
+    next(){
+        this.setIndex(this._currentIndex + 1)
+    }
+    prev(){
+        this.setIndex(this._currentIndex - 1)
     }
 }
 
