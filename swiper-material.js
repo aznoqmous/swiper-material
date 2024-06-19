@@ -1,5 +1,13 @@
-export default class SwiperMaterial {
-    constructor(container){
+export default class SwiperMaterial extends EventTarget {
+    constructor(container, opts={}){
+        super()
+        this.opts = Object.assign({
+            sizes: [0.7, 0.2, 0.1],
+            drag: true,
+            click: true,
+            activeTreshold: 0.9
+        }, opts)
+
         this.container = container
 
         this._currentIndex = 2
@@ -26,7 +34,7 @@ export default class SwiperMaterial {
         this.update()
     }
 
-    bind(){
+    bindDrag(){
         this.container.addEventListener('mousedown', (e)=>{
             this.updateRect()
             this.startDrag = e.clientX
@@ -40,18 +48,20 @@ export default class SwiperMaterial {
             this.currentDrag = (e.clientX - this.startDrag)/this.rect.width * this.dragModifier
             this.update()
         })
-
         window.addEventListener('mouseup', (e)=>{
             if(!this.startDrag) return;
             this.startDrag = null
-            
             if(!this.moveDrag) return;
             this.applyCurrentDrag()
-
             this.loop()
         })
+    }   
 
-        this.bindItems('click', (e,item,i)=>{
+    bind(){
+        if(this.opts.drag) this.bindDrag()
+
+        if(this.opts.click) this.bindItems('click', (e,item,i)=>{
+            if(this.moveDrag) return;
             this.setIndex(i)
         })
     }
@@ -61,7 +71,6 @@ export default class SwiperMaterial {
     }
 
     applyCurrentDrag(){
-        if(Math.abs(this.currentDrag) > 0.3){
             const nextIndex = minmax(this._currentIndex - Math.sign(this.currentDrag), 0, this.items.length-1)
             
             this.currentDrag -= this._currentIndex - nextIndex
@@ -69,7 +78,7 @@ export default class SwiperMaterial {
 
             if(nextIndex == 0 || nextIndex == this.items.length - 1) return;
             if(Math.abs(this.currentDrag) > 0.5) this.applyCurrentDrag()
-        }
+        
     }
 
     computeSizes(){
@@ -92,18 +101,25 @@ export default class SwiperMaterial {
     }
 
     update(){
-        const index = minmax(this._currentIndex - this.currentDrag, 0, this.items.length-1)
+        const index = minmax(this._currentIndex - this.currentDrag, -0.99, this.items.length - 0.01)
         this.items.map((item, i)=>{
             const dist = Math.abs(index - i)
             const prevDist = Math.floor(dist)
             const nextDist = prevDist + 1
             let prevValue = this.sizes[prevDist] || 0
             let nextValue = this.sizes[nextDist] || 0
+            if(i == 0 && index < 0) {
+                nextValue = prevValue * 2
+            }
+            if(i == this.items.length - 1 && index > this.items.length - 1){
+                nextValue = prevValue * 2
+                console.log(index, prevValue, nextValue)
+            }
             const ratio = dist - prevDist
             const targetValue = lerp(nextValue, prevValue, ratio)
             item.style.setProperty("--ratio", targetValue / this.activeSize)
             item.style.width = targetValue * 200 + "%"
-            item.classList.toggle('active', targetValue / this.activeSize > 0.9)
+            item.classList.toggle('active', targetValue / this.activeSize > this.activeTreshold)
         })
     }
 
