@@ -113,7 +113,6 @@ export default class SwiperMaterial extends EventTarget {
             }
             if(i == this.items.length - 1 && index > this.items.length - 1){
                 nextValue = prevValue * 2
-                console.log(index, prevValue, nextValue)
             }
             const ratio = dist - prevDist
             const targetValue = lerp(nextValue, prevValue, ratio)
